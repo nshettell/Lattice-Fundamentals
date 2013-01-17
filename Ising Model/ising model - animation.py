@@ -1,8 +1,66 @@
+class Sphere_C:
+    def __init__(self,spin,pos,trans_factor):
+        self.colour='Red' if spin==1 else 'Blue'
+        self.trans=trans_factor
+        self.i=pos[0]
+        self.j=pos[1]
+        self.k=pos[2]
+    def msg(self):
+        return """sphere {<%d,%d,%d>, 0.25
+texture{pigment{color %s} finish{phong 1}}
+transmit %f}
+""" %(self.i,self.j,self.k,self.colour,self.trans)
+################################################################################
+class Arrow:
+    def __init__(self,spin,pos,trans_factor):
+        self.rotate='<45,-45,0>' if spin==1 else '<-45,135,0>'
+        self.trans=trans_factor
+        self.i=pos[0]
+        self.j=pos[1]
+        self.k=pos[2]
+    def msg(self):
+        return """union {
+cylinder{
+    <0,0,0.25>,<0,0,-0.25>,0.17
+    texture{pigment{color Green} finish{phong 1}}}
+cone{
+    <0,0,-0.25>, 0.28
+    <0,0,-0.5>, 0
+    texture{pigment{color Green} finish{phong 1}}}
+rotate %s
+transmit %f
+translate <%d,%d,%d>}
+""" %(self.rotate,self.trans,self.i,self.j,self.k)
+################################################################################
+class Arrow_C:
+    def __init__(self,spin,pos,trans_factor):
+        self.rotate='<45,-45,0>' if spin==1 else '<-45,135,0>'
+        self.colour='Red' if spin==1 else 'Blue'
+        self.trans=trans_factor
+        self.i=pos[0]
+        self.j=pos[1]
+        self.k=pos[2]
+    def msg(self):
+        return """union {
+cylinder{
+    <0,0,0.25>,<0,0,-0.25>,0.17
+    texture{pigment{color %s} finish{phong 1}}}
+cone{
+    <0,0,-0.25>, 0.28
+    <0,0,-0.5>, 0
+    texture{pigment{color %s} finish{phong 1}}}
+rotate %s
+transmit %f
+translate <%d,%d,%d>}
+""" %(self.colour,self.colour,self.rotate,self.trans,self.i,self.j,self.k)
+################################################################################
+################################################################################
 def resolutions():
     R=[[128,128],[160,120],[320,200],[320,240],[512,384],[640,480],[800,600],[1024,768],[1280,1024],[1600,1200]]
+    print "The possible resolutions are:"
     for r in R:
         print "%dx%d" %(r[0],r[1])
-
+################################################################################
 def _ini_creator(res,image,frames,filename):
     if image=="jpeg":
         code="J"
@@ -13,7 +71,7 @@ def _ini_creator(res,image,frames,filename):
     return """
 ;POV-Ray animation ini file
 ;Visual Representation of an Ising model Square Lattice
-;Version 1.1
+;Version 1.2
 ;Author: Nathan Shettell
 
 Antialias=Off
@@ -24,7 +82,6 @@ Display=Off
 +H%d
 
 Input_File_Name='%s'
-
 Output_File_Type=%s
 
 Initial_Frame=1
@@ -35,48 +92,34 @@ Final_Clock=1
 Cyclic_Animation=on
 Pause_when_Done=off    
 """ %(res[0],res[1],filename,code,frames)
-
-def _pov_creator(axis,offset,shapes,Lx,Ly,Lz):
-    if shapes=="colours":
-        msg="/*Each sphere in the lattice has a varying colour (red or blue), the colour of the sphere in a certain\n\
-        frame represents the current spin of the object (red=1, blue=-1)*/"
-    elif shapes=="arrows":
-        msg="/*Each arrow in the lattice has a varying direction (towards or away), the direction of the arrow\n\
-        in a certain frame represents the current spin of the object (towards=1, away=-1)*/"
-    else:
-        msg="""/*
-Each arrow in the lattice has a varying direction and colour (towards & red or away & blue),
-the direction and colour of the arrow in a certain frame represents the current spin of the object
-(towards & red=1, away & blue=-1)
-*/"""
+################################################################################
+def _pov_creator(axis,offset,Lx,Ly,Lz):
     if axis=='x':
         if offset=='none':
-            loc="<%f,%f,%f>" %(-1.5*Lx,0.5*Ly,0.5*Lz)
+            loc="<%f,%f,%f>" %(-max(Ly,Lz),0.5*Ly,0.5*Lz)
         elif offset=='small':
-            loc="<%f,%f,%f>" %(-1.5*Lx,0.8*Ly,0.8*Lz)
+            loc="<%f,%f,%f>" %(-max(Ly,Lz),0.8*Ly,0.8*Lz)
         else:
-            loc="<%f,%f,%f>" %(-1.6*Lx,1.2*Ly,1.2*Lz)
+            loc="<%f,%f,%f>" %(-1.5*max(Ly,Lz),1.2*Ly,1.2*Lz)
     elif axis=='y':
         if offset=='none':
-            loc="<%f,%f,%f>" %(0.5*Lx,-1.5*Ly,0.5*Lz)
+            loc="<%f,%f,%f>" %(0.5*Lx,-max(Lx,Lz),0.5*Lz)
         elif offset=='small':
-            loc="<%f,%f,%f>" %(0.8*Lx,-1.5*Ly,0.8*Lz)
+            loc="<%f,%f,%f>" %(0.8*Lx,-max(Lx,Lz),0.8*Lz)
         else:
-            loc="<%f,%f,%f>" %(1.2*Lx,-1.6*Ly,1.2*Lz)
+            loc="<%f,%f,%f>" %(1.2*Lx,-1.5*max(Lx,Lz),1.2*Lz)
     elif axis=='z':
         if offset=='none':
-            loc="<%f,%f,%f>" %(0.5*Lx,0.5*Ly,-1.5*min(Lx,Ly))
+            loc="<%f,%f,%f>" %(0.5*Lx,0.5*Ly,-max(Lx,Ly))
         elif offset=='small':
-            loc="<%f,%f,%f>" %(0.8*Lx,0.8*Ly,-1.5*Lz)
+            loc="<%f,%f,%f>" %(0.8*Lx,0.8*Ly,-max(Lx,Ly))
         else:
-            loc="<%f,%f,%f>" %(1.2*Lx,1.2*Ly,-1.6*Lz)
+            loc="<%f,%f,%f>" %(1.2*Lx,1.2*Ly,-1.6*max(Lx,Ly))
     look="<%f,%f,%f>" %(0.5*Lx,0.5*Ly,0.5*Lz)
     return """
 //Visual Representation of an Ising model Square Lattice
-//Version 1.1
+//Version 1.2
 //Author: Nathan Shettell
-
-%s
 
 #include "shapes.inc"
 #include "textures.inc"
@@ -89,76 +132,11 @@ camera {
     look_at %s}
 
 background {rgb <1,1,1>}
-""" %(msg,loc,look)
-
-def _arrow_declare(axis):
-    if axis=='x':
-        rot='<0,45,-45>'
-        base='<0.3,0,0>'
-        top1='<-0.3,0,0>'
-        top2='<-0.4,0,0>'
-    elif axis=='y':
-        rot='<-45,0,45>'
-        base='<0,0.3,0>'
-        top1='<0,-0.3,0>'
-        top2='<0,0.4,0>'
-    else:
-        rot='<45,-45,0>'
-        base='<0,0,0.3>'
-        top1='<0,0,-0.3>'
-        top2='<0,0,-0.4>'
-    return """
-#declare shape = union {
-cylinder{
-    %s,%s,0.2
-    texture{pigment{color Green} finish{phong 1}}}
-cone{
-    %s, 0.28
-    %s, 0
-    texture{pigment{color Green}
-    finish{phong 1}}}
-    rotate %s}
-""" %(base,top1,top1,top2,rot)
-
-def _shape_creator(spin,transparancy,axis,shapes,i,j,k,Lx,Ly,Lz):
-    msg=""
-    pos='<%d,%d,%d>' %(i,j,k)
-    if shapes=='colours':
-        msg+="sphere {\n%s, 0.25\n" %(pos)
-    else:
-        msg+="object {\nshape\n"
-    if shapes!='arrows':
-        if spin==1:
-            msg+="texture{pigment{color Red} finish{phong 1}}\n"
-        else:
-            msg+="texture{pigment{color Blue} finish{phong 1}}\n"
-    if transparancy=='yes':
-        if axis=='x' and Lx>1:
-            msg+="transmit %d\n" %(0.5-i*0.5/(Lx-1))
-        elif axis=='y' and Ly>1:
-            msg+="transmit %d\n" %(0.5-j*0.5/(Ly-1))
-        elif axis=='z' and Lz>1:
-            msg+="transmit %d\n" %(0.5-ik*0.5/(Lz-1))
-    if spin==-1 and shapes!='colours':
-        if axis=='x':
-            msg+="rotate <0,180,180>\ntranslate %s\n" %(pos)
-        elif axis=='y':
-            msg+="rotate <180,0,180>\ntranslate %s\n" %(pos)
-        else:
-            msg+="rotate <180,180,0>\ntranslate %s\n" %(pos)
-    if spin==1 and shapes!='colours':
-        if axis=='x':
-            msg+="translate %s\n" %(pos)
-        elif axis=='y':
-            msg+="translate %s\n" %(pos)
-        else:
-            msg+="translate %s\n" %(pos)
-    msg+='}\n'            
-    return msg
-
-def start_ising(file_info,file_out,res=[640,480]):
+""" %(loc,look)
+################################################################################
+def start(file_info,file_out,res=[640,480]):
     """
-    Version 1.1
+    Version 1.2
     This function must intake 2 parameter:
     
     file_info: The name of the file the information is found on.
@@ -246,7 +224,7 @@ def start_ising(file_info,file_out,res=[640,480]):
     #Gather more information:
     print """
 This program will now gather information on how you would like to view the lattice.
-Note user input is case sensative.
+Note: user input is case sensative.
 
 The first option allows the viewer to choose whether they want the camera to look at the center
 with an offset angle from 0 degrees. The available options are: none, small, large.
@@ -300,17 +278,31 @@ if yes then the objects at the front will appear transparent. The options are: y
     
     ini.write(_ini_creator(res,image,counter,file_out[:-4]+'.pov'))
     ini.close()
-    pov.write(_pov_creator(cam,offset,rep,Lx,Ly,Lz))
-    if rep!='colours':
-        pov.write(_arrow_declare(cam))
+    pov.write(_pov_creator(cam,offset,Lx,Ly,Lz))
     
     #Add the sphapes to the image
     frame=1
     while frame<=counter:
         pov.write("#if (frame_number = %d)\n" %(frame))
         for pos in Lattice:
-            m=_shape_creator(Lattice[pos][frame-1],trans,cam,rep,pos[0],pos[1],pos[2],Lx,Ly,Lz)
-            pov.write(m)
+            if trans=="yes" and cam=='x' and Lx>1:
+                t_factor=0.5-pos[0]*0.5/Lx
+            elif trans=="yes" and cam=='y' and Ly>1:
+                t_factor=0.5-pos[1]*0.5/Ly
+            elif trans=="yes" and cam=='z' and Lz>1:
+                t_factor=0.5-pos[2]*0.5/Lz
+            else:
+                t_factor=0
+            
+            if rep=='colours':
+                temp=Sphere_C(Lattice[pos][frame-1],(pos[0],pos[1],pos[2]),t_factor)
+                pov.write(temp.msg())
+            elif rep=='arrows':
+                temp=Arrow(Lattice[pos][frame-1],(pos[0],pos[1],pos[2]),t_factor)
+                pov.write(temp.msg())
+            else:
+                temp=Arrow_C(Lattice[pos][frame-1],(pos[0],pos[1],pos[2]),t_factor)
+                pov.write(temp.msg())
         pov.write("#end\n")
         frame+=1
         
