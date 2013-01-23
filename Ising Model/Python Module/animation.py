@@ -78,6 +78,7 @@ def start(file_info,directory,res=[640,480]):
     D=os.getcwd()+sc+directory
     os.mkdir(D)
     pov=open(D+sc+directory+'.pov','w')
+    exe=open(D+sc+'execute','w')
         
     #Create all of the .ini files:
     ratio=counter/processors
@@ -87,7 +88,9 @@ def start(file_info,directory,res=[640,480]):
         
         tmp=open(D+sc+directory+" - "+str(i)+'.ini','w')
         tmp.write(ini_creator(first_frame,final_frame,res,image,directory+'.pov'))
+        exe.write("povray '%s' +I'%s' &\n" %(directory+'.pov',directory+' - '+str(i)+'.ini'))
         tmp.close()
+    exe.close()
     
     #Create the .pov file
     #First add greneral and camera info about the camera
