@@ -39,24 +39,40 @@ def cam_q():
     else:
         return cam
 ################################################################################
+def format_q():
+    form=raw_input("""Option 3: Would you like to create an animation or one image (which represents an average of the data)? The options are: animation and average. Please enter your choice: """)
+    if form not in ['animation','average']:
+        print "You did not input an available option, please enter: animation or average."
+        return format_q()   
+    else:
+        return form
+################################################################################
 def image_q():
-    image=raw_input("""Option 3: Which kind of image would you like to be produced? The options are: jpeg, png and bmp. Please enter your choice: """)
+    image=raw_input("""Option 4: Which kind of image would you like to be produced? The options are: jpeg, png and bmp. Please enter your choice: """)
     if image not in ['jpeg','png','bmp']:
         print "You did not input an available option, please enter: jpeg, png or bmp."
         return image_q()   
     else:
         return image
 ################################################################################
-def spinrep_q():
-    rep=raw_input("""Option 4: How would you like to represent the spin objects on the lattice? The options are: colours, arrows and arrows+colours. Please enter your choice: """)
-    if rep not in ['colours','arrows','arrows+colours']:
-        print "You did not input an available option, please enter: arrows, colours or arrows+colours."
-        return spinrep_q()   
+def spinrep_q(form):
+    if form=='animation':
+        rep=raw_input("""Option 5: How would you like to represent the spin objects on the lattice? The options are: colours, arrows and arrows+colours. Please enter your choice: """)
+        if rep not in ['colours','arrows','arrows+colours']:
+            print "You did not input an available option, please enter: arrows, colours or arrows+colours."
+            return spinrep_q(form)   
+        else:
+            return rep
     else:
-        return rep
+        rep=raw_input("""Option 5: How would you like to represent the spin objects on the lattice? The options are: colours and arrows+colours. Please enter your choice: """)
+        if rep not in ['colours','arrows+colours']:
+            print "You did not input an available option, please enter: arrows or arrows+colours."
+            return spinrep_q(form)   
+        else:
+            return rep
 ################################################################################
 def transparency_q():
-    trans=raw_input("""Option 5: Would you like the objects at the front of the lattice to appear more transparent than those at the back? The options are: yes and no. Please enter your choice: """)
+    trans=raw_input("""Option 6: Would you like the objects at the front of the lattice to appear more transparent than those at the back? The options are: yes and no. Please enter your choice: """)
     if trans not in ['yes','no']:
         print "You did not input an available option, please enter: yes or no."
         return transparency_q()  
@@ -66,7 +82,7 @@ def transparency_q():
 def processors_q(maximum):
     while True:
         try:
-            p=input("""Option 6: How many processors would you like to utilize? The number entered must be a postive integer less than or equal to %d (total number of processors). It is recommended that the number of processors does not exceed the number of free processors. Please enter your choice: """ %(maximum))
+            p=input("""Option 7: How many processors would you like to utilize? The number entered must be a postive integer less than or equal to %d (total number of processors). It is recommended that the number of processors does not exceed the number of free processors. Please enter your choice: """ %(maximum))
             p=int(p)
             if p<=0:
                 print "That was not a valid entry, please try again.\n"

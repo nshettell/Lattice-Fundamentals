@@ -1,6 +1,6 @@
 class Sphere_C:
     def __init__(self,spin,pos,trans_factor):
-        self.colour='Red' if spin==1 else 'Blue'
+        self.colour='<%f,0,%f>' %(spin,1-spin)
         self.trans=trans_factor
         self.i=pos[0]
         self.j=pos[1]
@@ -33,7 +33,7 @@ translate <%d,%d,%d>}
 class Arrow_C:
     def __init__(self,spin,pos,trans_factor):
         self.rotate='<45,-45,0>' if spin==1 else '<-45,135,0>'
-        self.colour='Red' if spin==1 else 'Blue'
+        self.colour='<%f,0,%f>' %(spin,1-spin)
         self.trans=trans_factor
         self.i=pos[0]
         self.j=pos[1]
