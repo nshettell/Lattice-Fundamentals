@@ -88,7 +88,7 @@ def start(file_info,directory,res=[640,480]):
         
         tmp=open(D+sc+directory+" - "+str(i)+'.ini','w')
         tmp.write(ini_creator(first_frame,final_frame,res,image,directory+'.pov'))
-        exe.write("povray '%s' +I'%s' &\n" %(directory+'.pov',directory+' - '+str(i)+'.ini'))
+        exe.write("povray '%s' +I'%s' &\n" %(directory+' - '+str(i)+'.ini',directory+'.pov',))
         tmp.close()
     exe.close()
     
