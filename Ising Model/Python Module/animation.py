@@ -170,3 +170,6 @@ def start(file_info,directory,res=[640,480]):
         s="cylinder{<%d,%d,%d>,<%d,%d,%d>,0.07 texture{pigment{color NewTan} finish{phong 1}}}\n" %(i,j,k,i,j,k+1)
         pov.write(s)
     pov.close()
+    
+    #Start rendering the images
+    os.system("cd '%s' && . ./execute" %(D))
