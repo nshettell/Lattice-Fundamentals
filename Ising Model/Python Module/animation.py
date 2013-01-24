@@ -64,11 +64,13 @@ def start(file_info,directory,res=[640,480]):
     #Gather more information from the user:
     offset=offset_q()
     cam=cam_q()
+    form=format_q()
     image=image_q()
-    spinrep=spinrep_q()
+    spinrep=spinrep_q(form)
     trans=transparency_q()
     processors=processors_q(multiprocessing.cpu_count())   
     res=[640,480] if res not in resolutions() else res
+    processors=1 if form=='average'else processors
     
     #Create a directory to store all the files as well as a .pov file:
     if os.name=='posix': #Different os systems have different path names
@@ -98,9 +100,33 @@ def start(file_info,directory,res=[640,480]):
     pov.write(camera_info(cam,offset,Lx,Ly,Lz))
     
     #Add the sphapes to the image
-    frame=1
-    while frame<=counter:
-        pov.write("#if (frame_number = %d)\n" %(frame))
+    if form=='animation':
+        frame=1
+        while frame<=counter:
+            pov.write("#if (frame_number = %d)\n" %(frame))
+            for pos in Lattice:
+                if trans=="yes" and cam=='x' and Lx>1:
+                    t_factor=0.5-pos[0]*0.5/Lx
+                elif trans=="yes" and cam=='y' and Ly>1:
+                    t_factor=0.5-pos[1]*0.5/Ly
+                elif trans=="yes" and cam=='z' and Lz>1:
+                    t_factor=0.5-pos[2]*0.5/Lz
+                else:
+                    t_factor=0
+                    
+                if spinrep=='colours':
+                    temp=Sphere_C(Lattice[pos][frame-1],(pos[0],pos[1],pos[2]),t_factor)
+                    pov.write(temp.msg())
+                elif spinrep=='arrows':
+                    temp=Arrow(Lattice[pos][frame-1],(pos[0],pos[1],pos[2]),t_factor)
+                    pov.write(temp.msg())
+                else:
+                    temp=Arrow_C(Lattice[pos][frame-1],(pos[0],pos[1],pos[2]),t_factor)
+                    pov.write(temp.msg())
+            pov.write("#end\n")
+            frame+=1
+    elif form=='average':
+        pov.write("#if (frame_number = 1)\n")
         for pos in Lattice:
             if trans=="yes" and cam=='x' and Lx>1:
                 t_factor=0.5-pos[0]*0.5/Lx
@@ -111,17 +137,15 @@ def start(file_info,directory,res=[640,480]):
             else:
                 t_factor=0
             
+            avg=sum(filter(lambda i: i==1, Lattice[pos]))/float(counter)
+            
             if spinrep=='colours':
-                temp=Sphere_C(Lattice[pos][frame-1],(pos[0],pos[1],pos[2]),t_factor)
-                pov.write(temp.msg())
-            elif spinrep=='arrows':
-                temp=Arrow(Lattice[pos][frame-1],(pos[0],pos[1],pos[2]),t_factor)
+                temp=Sphere_C(avg,(pos[0],pos[1],pos[2]),t_factor)
                 pov.write(temp.msg())
             else:
-                temp=Arrow_C(Lattice[pos][frame-1],(pos[0],pos[1],pos[2]),t_factor)
+                temp=Arrow_C(avg,(pos[0],pos[1],pos[2]),t_factor)
                 pov.write(temp.msg())
         pov.write("#end\n")
-        frame+=1
         
     #Adds the cylinders ('bonds') to the image
     Bx=[(i,j,k) for i in range(Lx-1) for j in range(Ly) for k in range(Lz)]
