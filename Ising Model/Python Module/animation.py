@@ -2,6 +2,7 @@ from configuration import ini_creator
 from shapes import *
 from user_questions import *
 from povray import *
+from plat import *
 import multiprocessing
 import os
 
@@ -70,18 +71,25 @@ def start(file_info,directory,res=[640,480]):
     trans=transparency_q()
     processors=processors_q(multiprocessing.cpu_count())   
     res=[640,480] if res not in resolutions() else res
-    processors=1 if form=='average'else processors
+    processors=1 if form=='average' else processors
     
+    OS=determine() #Determine the operating system
     #Create a directory to store all the files as well as a .pov file:
-    if os.name=='posix': #Different os systems have different path names
-        sc='/'
-    else:
+    if OS=='Windows': #Different os systems use different path names
         sc='\\'
-    D=os.getcwd()+sc+directory
-    os.mkdir(D)
+        D=os.getcwd()+sc+directory
+        os.mkdir(D)
+        exe=open(D+sc+'execute.bat','w')
+    else:
+        sc='/'
+        D=os.getcwd()+sc+directory
+        os.mkdir(D)
+        exe=open(D+sc+'execute','w')
     pov=open(D+sc+directory+'.pov','w')
-    exe=open(D+sc+'execute','w')
-        
+    
+    if OS=='Windows': #pvengine should be in the same directory as your files if you are using windows
+        os.system('copy pvengine.exe %s' %(D))
+    
     #Create all of the .ini files:
     ratio=counter/processors
     for i in range(1,processors+1):
@@ -90,8 +98,12 @@ def start(file_info,directory,res=[640,480]):
         
         tmp=open(D+sc+directory+" - "+str(i)+'.ini','w')
         tmp.write(ini_creator(first_frame,final_frame,res,image,directory+'.pov'))
-        exe.write("povray '%s' +I'%s' &\n" %(directory+' - '+str(i)+'.ini',directory+'.pov',))
         tmp.close()
+        
+        if OS=='Windows':
+            exe.write("pvengine /render '%s' &\n" %(directory+' - '+str(i)+'.ini'))
+        else:
+            exe.write("povray '%s' +I'%s' &\n" %(directory+' - '+str(i)+'.ini',directory+'.pov'))    
     exe.close()
     
     #Create the .pov file
@@ -172,4 +184,7 @@ def start(file_info,directory,res=[640,480]):
     pov.close()
     
     #Start rendering the images
-    os.system("cd '%s' && . ./execute" %(D))
+    if OS=='Windows':
+        os.system("cd\ && cd %s && execute.bat" %(D))
+    else:
+        os.system("cd '%s' && . ./execute" %(D))
